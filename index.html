@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Создание Telegram-ботов на Python</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #dceeff;
+            color: #12263f;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .slides {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide-input {
+            width: 56px;
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed rgba(23, 78, 133, 0.45);
+            color: #17324f;
+            font-size: 0.9rem;
+            font-family: inherit;
+            text-align: center;
+            outline: none;
+            cursor: text;
+            -moz-appearance: textfield;
+        }
+
+        .slide-input:focus {
+            border-bottom: 1px solid #2196f3;
+            background: rgba(33, 150, 243, 0.10);
+            border-radius: 6px 6px 0 0;
+        }
+
+        /* убираем стрелки-спиннеры */
+        .slide-input::-webkit-outer-spin-button,
+        .slide-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            overflow: hidden;
+            padding: 3rem 4rem;
+            background: linear-gradient(135deg, #eaf6ff, #cfe8ff, #e3f2fd);
+            scrollbar-width: thin;
+            scrollbar-color: #7cb8e8 #dbeaf8;
+        }
+
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: #dbeaf8;
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: #7cb8e8;
+            border-radius: 10px;
+        }
+
+        .slide-content {
+            max-width: 1200px;
+            max-height: 100%;
+            overflow-y: auto; 
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 45px rgba(23, 78, 133, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #dbeaf8;
+            border-radius: 10px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: #7cb8e8;
+            border-radius: 10px;
+        }
+        h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #0d47a1, #42a5f5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            color: #0d47a1;
+            border-left: 6px solid #2196f3;
+            padding-left: 20px;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        h3 {
+            font-size: 1.6rem;
+            color: #173a5e;
+            margin: 1rem 0 0.8rem;
+        }
+
+        .title-slide h1 {
+            font-size: 4.5rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .title-slide .sub {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #43617f;
+            margin-top: 1rem;
+        }
+
+        p, li {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+            color: #17324f;
+        }
+
+        ul, .code-block {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .code-block {
+            background: #ffffff;
+            padding: 1rem;
+            border-radius: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            border-left: 4px solid #2196f3;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 1rem 0;
+            color: #12314f;
+            box-shadow: 0 4px 12px rgba(23, 78, 133, 0.08);
+        }
+
+        pre {
+            background: #ffffff;
+            padding: 1rem;
+            border-radius: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            border-left: 4px solid #2196f3;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 1rem 0;
+            color: #12314f;
+            box-shadow: 0 4px 12px rgba(23, 78, 133, 0.08);
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: rgba(33, 150, 243, 0.15);
+            color: #0b3f6b;
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            background: #2196f3;
+            color: #fff;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            display: inline-block;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .task-card {
+            background: rgba(33, 150, 243, 0.08);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin: 1.2rem 0;
+            border: 1px solid rgba(33, 150, 243, 0.35);
+        }
+
+        .task-card h3 {
+            color: #0d47a1;
+            margin-top: 0;
+        }
+
+        .answer-container {
+            margin-top: 1rem;
+            border-top: 1px dashed rgba(33, 150, 243, 0.45);
+            padding-top: 1rem;
+        }
+
+        .answer-content {
+            background: #eef7ff;
+            border: 1px solid rgba(33, 150, 243, 0.25);
+            border-radius: 16px;
+            padding: 1rem;
+            display: none;
+        }
+
+        .answer-content.visible {
+            display: block;
+        }
+
+        .unlock-btn {
+            background: #2196f3;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: 0.2s;
+        }
+
+        .unlock-btn:hover {
+            background: #1976d2;
+            transform: scale(1.02);
+        }
+
+        .answer-label {
+            font-size: 0.9rem;
+            color: #5b7894;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .grid-demo {
+            display: grid;
+            background: #dcecfb;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 24px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .grid-demo > div {
+            background: #2196f3;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 16px;
+        }
+
+        .two-col {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .three-col {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .nav-controls {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: rgba(33, 150, 243, 0.92);
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 60px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(23, 78, 133, 0.25);
+        }
+
+        .nav-btn:hover {
+            background: #1976d2;
+            transform: scale(1.02);
+        }
+
+        .slide-number {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            background: rgba(255, 255, 255, 0.85);
+            color: #17324f;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(23, 78, 133, 0.15);
+        }
+
+        /* Кнопка "Показать все ответы" — внизу по центру */
+        .global-unlock {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef5350;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(23, 78, 133, 0.25);
+            transition: 0.2s;
+        }
+
+        .global-unlock:hover {
+            background: #e53935;
+            transform: translateX(-50%) scale(1.03);
+        }
+
+        .info-tree {
+            background: #ffffff;
+            border: 1px solid rgba(33, 150, 243, 0.25);
+            border-radius: 20px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #0b5394;
+            box-shadow: 0 4px 12px rgba(23, 78, 133, 0.08);
+        }
+
+        .output-block {
+            background: rgba(0, 200, 120, 0.10);
+            border-left: 4px solid #00b368;
+            border-radius: 16px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: #05603f;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+        }
+
+        .error-block {
+            background: rgba(239, 83, 80, 0.10);
+            border-left: 4px solid #ef5350;
+            border-radius: 16px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: #b71c1c;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 700px) {
+            .slide-input { width: 40px; font-size: 0.8rem; }
+            .slide { padding: 1.5rem; }
+            .slide-content { padding: 1.5rem; }
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 1.5rem; }
+            p, li { font-size: 1rem; }
+            pre, .code-block { font-size: 0.8rem; }
+            .global-unlock { font-size: 0.7rem; padding: 6px 12px; bottom: 85px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="presentation-container">
+    <div class="slides" id="slidesContainer">
+        <!-- Слайды будут сгенерированы JavaScript -->
+    </div>
+
+    <!-- Навигация -->
+    <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn">◀ Назад</button>
+        <button class="nav-btn" id="nextBtn">Вперед ▶</button>
+    </div>
+    <button class="global-unlock" id="globalUnlockBtn">🔓 Показать все ответы (пароль)</button>
+    <!-- <div class="slide-number" id="slideCounter">Слайд 1 / 100</div> -->
+     <div class="slide-number" id="slideCounter">
+        Слайд <input type="number" id="slideInput" class="slide-input" min="1" value="1" title="Введите номер слайда и нажмите Enter"> / <span id="totalSlidesSpan">100</span>
+    </div>
+</div>
+
+<script>
+    // ==================== ДАННЫЕ ДЛЯ СЛАЙДОВ ====================
+    const slidesData = [
+        // ---------- РАЗДЕЛ 1: ВВЕДЕНИЕ (1-10) ----------
+        {
+            type: 'title',
+            title: '🤖 Разработка Telegram-бота с интеграцией ИИ',
+            subtitle: 'Библиотека python-telegram-bot. От первой строки кода до работающего бота.',
+            badges: ['Python', 'Telegram', 'Боты', 'python-telegram-bot']
+        },
+        
+        {
+            type: 'content',
+            title: '🤔 Что такое бот?',
+            content: `
+                <p><strong>Бот</strong> — это программа, которая автоматически выполняет команды пользователя.</p>
+                <p>В Telegram бот — это аккаунт, управляемый программой. Он может:</p>
+                <ul>
+                    <li>★ отвечать на сообщения;</li>
+                    <li>★ отправлять картинки, видео, файлы;</li>
+                    <li>★ показывать кнопки и меню;</li>
+                    <li>★ выполнять расчёты, искать информацию и многое другое.</li>
+                </ul>
+            `
+        },
+        {
+            type: 'content',
+            title: '📱 Что такое Telegram?',
+            content: `
+                <p><strong>Telegram</strong> — это мессенджер, который поддерживает ботов.</p>
+                <p>Боты в Telegram — это официальная функция. Любой может создать бота и запрограммировать его поведение.</p>
+                <p>📌 Боты помогают автоматизировать рутину, развлекать, обучать и даже продавать товары.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🐍 Что такое Python?',
+            content: `
+                <p><strong>Python</strong> — это язык программирования. Он считается одним из самых простых для изучения.</p>
+                <p>На Python пишут сайты, игры, анализируют данные и, конечно, создают ботов.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '📦 Что такое библиотека?',
+            content: `
+                <p><strong>Библиотека</strong> — это набор готовых инструментов (функций), которые можно использовать в своей программе.</p>
+                <p>Например, есть библиотеки для работы с картинками, для математики, для Telegram.</p>
+                <p>📌 <code>python-telegram-bot</code> — это библиотека, которая упрощает создание Telegram-ботов.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🎯 Чему вы научитесь?',
+            content: `
+                <p>За этот курс вы:</p>
+                <ul>
+                    <li>★ установите Python и среду разработки;</li>
+                    <li>★ выучите основы Python (переменные, условия, циклы, функции);</li>
+                    <li>★ создадите бота в Telegram через BotFather;</li>
+                    <li>★ напишете код, который будет отвечать на сообщения;</li>
+                    <li>★ добавите кнопки, отправку фото и обработку команд;</li>
+                    <li>★ запустите бота так, чтобы он работал постоянно.</li>
+                </ul>
+            `
+        },
+        {
+            type: 'content',
+            title: '⚠️ Что нужно для старта?',
+            content: `
+                <ul>
+                    <li>★ Компьютер (Windows, macOS или Linux).</li>
+                    <li>★ Установленный Python (мы это сделаем вместе).</li>
+                    <li>★ Аккаунт в Telegram.</li>
+                    <li>★ Желание экспериментировать!</li>
+                </ul>
+                <p>📌 Всё остальное мы установим и настроим по шагам.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🗺️ План курса',
+            content: `
+                <div class="grid-demo two-col">
+                    <div>1. Основы Python</div>
+                    <div>2. Установка и настройка</div>
+                    <div>3. Первый бот</div>
+                    <div>4. Обработка сообщений</div>
+                    <div>5. Команды и фильтры</div>
+                    <div>6. Клавиатуры</div>
+                    <div>7. Медиа и файлы</div>
+                    <div>8. Состояния и данные</div>
+                    <div>9. Продвинутые темы</div>
+                    <div>10. Развёртывание</div>
+                </div>
+            `
+        },
+       
+        // ---------- РАЗДЕЛ 2: ОСНОВЫ PYTHON (11-30) ----------
+        {
+            type: 'content',
+            title: '💻 Установка Python (Windows)',
+            content: `
+                <p>1. Зайдите на <code>python.org/downloads</code></p>
+                <p>2. Скачайте последнюю версию Python 3.</p>
+                <p>3. Запустите установщик и <strong>обязательно</strong> поставьте галочку <strong>«Add Python to PATH»</strong>.</p>
+                <p>4. Нажмите <strong>«Install Now»</strong>.</p>
+                <p>📌 После установки откройте командную строку (cmd) и введите <code>python --version</code>. Должна показаться версия Python.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '💻 Установка Python (macOS/Linux)',
+            content: `
+                <p>На macOS и Linux Python часто уже установлен. Проверьте командой:</p>
+                <div class="code-block">python3 --version</div>
+                <p>Если Python нет, скачайте установщик с <code>python.org</code> или установите через пакетный менеджер:</p>
+                <div class="code-block">brew install python3   # macOS\nsudo apt install python3   # Ubuntu/Debian</div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📝 Где писать код?',
+            content: `
+                <p>Можно писать код в простом блокноте, но удобнее использовать <strong>редактор кода</strong>.</p>
+                <p>Рекомендуем:</p>
+                <ul>
+                    <li>★ <strong>VS Code</strong> — бесплатный, лёгкий, много расширений.</li>
+                    <li>★ <strong>PyCharm Community</strong> — специально для Python.</li>
+                    <li>★ <strong>Thonny</strong> — идеален для начинающих.</li>
+                </ul>
+            `
+        },
+        
+        {
+            type: 'content',
+            title: '📄 Первая программа',
+            content: `
+                <p>Создайте файл <code>hello.py</code> и напишите:</p>
+                <div class="code-block">print("Привет, мир!")</div>
+                <p>Запустите программу: в VS Code нажмите <strong>F5</strong> или в терминале введите <code>python hello.py</code>.</p>
+                <div class="output-block">Привет, мир!</div>
+                <p>📌 <code>print()</code> — это функция, которая выводит текст на экран.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '📦 Переменные',
+            content: `
+                <p><strong>Переменная</strong> — это «коробка» с именем, в которой хранится значение.</p>
+                <div class="code-block">
+                    name = "Аня"\nage = 12\nprint(name)\nprint(age)
+                </div>
+                <div class="output-block">Аня\n12</div>
+                <p>📌 Имена переменных могут содержать буквы, цифры и знак подчёркивания, но не могут начинаться с цифры.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔢 Типы данных',
+            content: `
+                <p>Основные типы:</p>
+                <ul>
+                    <li>★ <code>int</code> — целые числа: <code>5</code>, <code>-3</code>, <code>100</code></li>
+                    <li>★ <code>float</code> — дробные числа: <code>3.14</code>, <code>-0.5</code></li>
+                    <li>★ <code>str</code> — строки: <code>"Привет"</code>, <code>'Python'</code></li>
+                    <li>★ <code>bool</code> — логический тип: <code>True</code> или <code>False</code></li>
+                </ul>
+                <div class="code-block">
+                    x = 10          # int\ny = 3.5         # float\nname = "Тим"    # str\nis_student = True  # bool
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '➕ Арифметика',
+            content: `
+                <p>Python умеет считать:</p>
+                <div class="code-block">
+                    a = 10\nb = 3\nprint(a + b)   # 13\nprint(a - b)   # 7\nprint(a * b)   # 30\nprint(a / b)   # 3.333...\nprint(a // b)  # 3 (целочисленное деление)\nprint(a % b)   # 1 (остаток)\nprint(a ** b)  # 1000 (возведение в степень)
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 1: Приветствие',
+            task: 'Напишите программу, которая запрашивает имя пользователя и выводит приветствие.',
+            answer: `name = input("Как тебя зовут? ")\nprint(f"Привет, {name}!")`
+        },
+        {
+            type: 'content',
+            title: '📥 Ввод данных',
+            content: `
+                <p>Функция <code>input()</code> позволяет получить текст от пользователя:</p>
+                <div class="code-block">
+                    name = input("Введите имя: ")\nprint("Привет, " + name + "!")
+                </div>
+                <p>📌 <code>input()</code> всегда возвращает строку. Чтобы получить число, используйте <code>int()</code> или <code>float()</code>:</p>
+                <div class="code-block">
+                    age = int(input("Сколько тебе лет? "))\nprint(f"Через год тебе будет {age + 1}")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔀 Условия: if, elif, else',
+            content: `
+                <p>Условия позволяют выполнять код только при определённых обстоятельствах.</p>
+                <div class="code-block">
+                    age = 15\nif age >= 18:\n    print("Взрослый")\nelif age >= 12:\n    print("Подросток")\nelse:\n    print("Ребёнок")
+                </div>
+                <div class="output-block">Подросток</div>
+                <p>📌 Отступы важны! Тело условия пишется с отступом (4 пробела).</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 2: Чётное или нечётное',
+            task: 'Напишите программу, которая запрашивает число и выводит «Чётное» или «Нечётное».',
+            answer: `n = int(input("Введите число: "))\nif n % 2 == 0:\n    print("Чётное")\nelse:\n    print("Нечётное")`
+        },
+        {
+            type: 'content',
+            title: '🔄 Цикл for',
+            content: `
+                <p>Цикл <code>for</code> повторяет код несколько раз.</p>
+                <div class="code-block">
+                    for i in range(5):\n    print("Повтор", i)
+                </div>
+                <div class="output-block">Повтор 0\nПовтор 1\nПовтор 2\nПовтор 3\nПовтор 4</div>
+                <p>📌 <code>range(5)</code> создаёт последовательность от 0 до 4.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔄 Цикл while',
+            content: `
+                <p>Цикл <code>while</code> выполняется, пока условие истинно.</p>
+                <div class="code-block">
+                    i = 0\nwhile i < 3:\n    print(i)\n    i += 1
+                </div>
+                <div class="output-block">0\n1\n2</div>
+                <p>📌 <code>i += 1</code> увеличивает i на 1. Без этого цикл будет бесконечным.</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 3: Сумма чисел',
+            task: 'Напишите программу, которая считает сумму чисел от 1 до 10 с помощью цикла.',
+            answer: `total = 0\nfor i in range(1, 11):\n    total += i\nprint(total)   # 55`
+        },
+        {
+            type: 'content',
+            title: '📋 Списки',
+            content: `
+                <p><strong>Список</strong> — это упорядоченная коллекция элементов.</p>
+                <div class="code-block">
+                    fruits = ["яблоко", "банан", "апельсин"]\nprint(fruits[0])   # яблоко\nprint(fruits[-1])  # апельсин\nfruits.append("груша")\nprint(fruits)
+                </div>
+                <p>📌 Элементы нумеруются с 0.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '📖 Словари',
+            content: `
+                <p><strong>Словарь</strong> хранит пары «ключ — значение».</p>
+                <div class="code-block">
+                    user = {"name": "Аня", "age": 12}\nprint(user["name"])   # Аня\nuser["city"] = "Москва"\nprint(user)
+                </div>
+                <p>📌 Словари удобны для хранения структурированных данных.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🧩 Функции',
+            content: `
+                <p><strong>Функция</strong> — это блок кода, который можно вызывать по имени.</p>
+                <div class="code-block">
+                    def greet(name):\n    print(f"Привет, {name}!")\n\ngreet("Петя")\ngreet("Маша")
+                </div>
+                <div class="output-block">Привет, Петя!\nПривет, Маша!</div>
+                <p>📌 <code>def</code> — ключевое слово для создания функции.</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 4: Функция сложения',
+            task: 'Напишите функцию add(a, b), которая возвращает сумму двух чисел. Вызовите её и выведите результат.',
+            answer: `def add(a, b):\n    return a + b\n\nresult = add(3, 7)\nprint(result)   # 10`
+        },
+        {
+            type: 'content',
+            title: '📦 Импорт модулей',
+            content: `
+                <p>Чтобы использовать чужой код, его импортируют:</p>
+                <div class="code-block">
+                    import math\nprint(math.sqrt(16))   # 4.0\n\nfrom random import randint\nprint(randint(1, 6))   # случайное число от 1 до 6
+                </div>
+                <p>📌 <code>import</code> подключает модуль, <code>from ... import ...</code> — конкретную функцию.</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 5: Калькулятор',
+            task: 'Напишите программу-калькулятор: запросите два числа и операцию (+, -, *, /), выведите результат.',
+            answer: `a = float(input("Первое число: "))\nb = float(input("Второе число: "))\nop = input("Операция (+, -, *, /): ")\n\nif op == "+":\n    print(a + b)\nelif op == "-":\n    print(a - b)\nelif op == "*":\n    print(a * b)\nelif op == "/":\n    print(a / b if b != 0 else "На ноль делить нельзя")`
+        },
+        {
+            type: 'content',
+            title: '📁 Работа с файлами (кратко)',
+            content: `
+                <p>Чтение и запись файлов:</p>
+                <div class="code-block">
+                    # Запись\nwith open("data.txt", "w") as f:\n    f.write("Привет, файл!")\n\n# Чтение\nwith open("data.txt", "r") as f:\n    content = f.read()\n    print(content)
+                </div>
+                <p>📌 <code>with open(...)</code> автоматически закрывает файл.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🛡️ Обработка ошибок',
+            content: `
+                   <p>Чтобы программа не «падала», используют <code>try/except</code>:</p>
+                    <div class="code-block">
+                        try:\n    n = int(input("Введите число: "))\n    print(10 / n)\nexcept ValueError:\n    print("Это не число!")\nexcept ZeroDivisionError:\n    print("На ноль делить нельзя!")
+                    </div>
+
+                    <h3>Какие исключения можно указывать в <code>except</code>?</h3>
+                    <p>В <code>except</code> можно перечислить <strong>любой класс исключения</strong> (или несколько классов в кортеже). Python перехватит ошибку, если она является экземпляром указанного класса или его наследником.</p>
+
+                    <p><strong>Основные варианты:</strong></p>
+                    <ul>
+                        <li>★ <code>except Exception:</code> — перехватывает почти все стандартные ошибки (базовый класс для большинства исключений).</li>
+                        <li>★ <code>except ValueError:</code> — неверное значение (например, <code>int("abc")</code>).</li>
+                        <li>★ <code>except TypeError:</code> — неподходящий тип (например, <code>"2" + 2</code>).</li>
+                        <li>★ <code>except ZeroDivisionError:</code> — деление на ноль.</li>
+                        <li>★ <code>except IndexError:</code> — выход за границы списка/строки.</li>
+                        <li>★ <code>except KeyError:</code> — отсутствующий ключ в словаре.</li>
+                        <li>★ <code>except FileNotFoundError:</code> — файл не найден.</li>
+                        <li>★ <code>except (ValueError, TypeError):</code> — несколько исключений сразу (кортеж).</li>
+                        <li>★ <code>except:</code> — «голый» except перехватывает <strong>всё</strong>, включая системные исключения (используют редко, только когда действительно нужно поймать любую ошибку).</li>
+                    </ul>
+
+                    <p><strong>Свои исключения:</strong> можно создавать собственные классы ошибок, наследуя их от <code>Exception</code>, и указывать их в <code>except</code>:</p>
+                    <div class="code-block">
+                        class MyError(Exception):\n    pass\n\ntry:\n    raise MyError("Что-то пошло не так")\nexcept MyError as e:\n    print("Поймали свою ошибку:", e)
+                    </div>
+
+                    <p>📌 <strong>Совет:</strong> лучше указывать конкретные исключения, а не «голый» <code>except</code> — так программа не скроет непредвиденные ошибки.</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 6: Безопасный ввод',
+            task: 'Напишите программу, которая запрашивает число и выводит его квадрат. Обработайте ошибку, если введено не число.',
+            answer: `try:\n    n = int(input("Введите число: "))\n    print(n ** 2)\nexcept ValueError:\n    print("Ошибка: нужно ввести число!")`
+        },
+        // ---------- РАЗДЕЛ 3: ПОДГОТОВКА К РАБОТЕ С TELEGRAM (31-50) ----------
+        {
+            type: 'content',
+            title: '📦 Установка python-telegram-bot',
+            content: `
+                <p>Откройте терминал (командную строку) и введите:</p>
+                <div class="code-block">pip install python-telegram-bot</div>
+                <p>Если у вас несколько версий Python, попробуйте:</p>
+                <div class="code-block">pip3 install python-telegram-bot</div>
+                <p>📌 После установки можно импортировать библиотеку в коде: <code>from telegram import Update</code>.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🤖 Создание бота через BotFather',
+            content: `
+                <p>1. Откройте Telegram и найдите <strong>@BotFather</strong>.</p>
+                <p>2. Отправьте команду <code>/newbot</code>.</p>
+                <p>3. Придумайте имя бота (например, «Мой первый бот»).</p>
+                <p>4. Придумайте username, заканчивающийся на <code>bot</code> (например, <code>my_first_test_bot</code>).</p>
+                <p>5. BotFather выдаст <strong>токен</strong> — длинную строку с цифрами и буквами.</p>
+                <p>📌 Сохраните токен! Он нужен для управления ботом.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔑 Что такое токен?',
+            content: `
+                <p><strong>Токен</strong> — это секретный ключ, который даёт доступ к вашему боту.</p>
+                <p>Пример токена:</p>
+                <div class="code-block">1234567890:ABCdefGHIjklMNOpqrsTUVwxyz</div>
+                <p>📌 Никому не показывайте токен! Если он попал в чужие руки, бот могут использовать злоумышленники.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '📁 Структура проекта',
+            content: `
+                <p>Создайте папку <code>my_bot</code> и внутри неё файл <code>bot.py</code>.</p>
+                <div class="info-tree">
+                    my_bot/\n└── bot.py
+                </div>
+                <p>📌 Весь код бота будем писать в <code>bot.py</code>.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🚀 Первый бот: эхо',
+            content: `
+                <p>Эхо-бот повторяет всё, что ему напишут.</p>
+                <div class="code-block">
+                    from telegram.ext import Application, MessageHandler, filters\n\nTOKEN = "ВАШ_ТОКЕН"\n\nasync def echo(update, context):\n    text = update.message.text\n    await update.message.reply_text(text)\n\ndef main():\n    app = Application.builder().token(TOKEN).build()\n    app.add_handler(MessageHandler(filters.TEXT, echo))\n    app.run_polling()\n\nif __name__ == "__main__":\n    main()
+                </div>
+                <p>📌 Замените <code>ВАШ_ТОКЕН</code> на токен от BotFather.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔍 Разбор эхо-бота',
+            content: `
+                <ul>
+                    <li>★ <code>Application.builder().token(TOKEN).build()</code> — создаёт приложение бота.</li>
+                    <li>★ <code>MessageHandler(filters.TEXT, echo)</code> — обработчик текстовых сообщений.</li>
+                    <li>★ <code>async def echo</code> — асинхронная функция, которая получает сообщение и отвечает.</li>
+                    <li>★ <code>await update.message.reply_text(text)</code> — отправляет ответ.</li>
+                    <li>★ <code>app.run_polling()</code> — запускает бота и ждёт сообщения.</li>
+                </ul>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 7: Бот-перевёртыш',
+            task: 'Измените эхо-бота так, чтобы он отвечал перевёрнутым текстом (например, "привет" → "тевирп").',
+            answer: `async def reverse_echo(update, context):\n    text = update.message.text\n    reversed_text = text[::-1]\n    await update.message.reply_text(reversed_text)\n\n# в main(): app.add_handler(MessageHandler(filters.TEXT, reverse_echo))`
+        },
+        {
+            type: 'content',
+            title: '📨 Команды',
+            content: `
+                <p>Команды начинаются с <code>/</code>. Например, <code>/start</code>, <code>/help</code>.</p>
+                <div class="code-block">
+                    from telegram.ext import CommandHandler\n\nasync def start(update, context):\n    await update.message.reply_text("Привет! Я бот.")\n\n# в main():\napp.add_handler(CommandHandler("start", start))
+                </div>
+                <p>📌 <code>CommandHandler</code> реагирует на команды.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🎛️ Фильтры',
+            content: `
+                <p>Фильтры определяют, на какие сообщения реагировать.</p>
+                <ul>
+                    <li>★ <code>filters.TEXT</code> — текстовые сообщения</li>
+                    <li>★ <code>filters.PHOTO</code> — фотографии</li>
+                    <li>★ <code>filters.VOICE</code> — голосовые</li>
+                    <li>★ <code>filters.COMMAND</code> — команды</li>
+                </ul>
+                <div class="code-block">
+                    app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 8: Команда /help',
+            task: 'Добавьте команду /help, которая отвечает списком доступных команд.',
+            answer: `async def help_command(update, context):\n    await update.message.reply_text("/start - приветствие\\n/help - помощь")\n\n# в main():\napp.add_handler(CommandHandler("help", help_command))`
+        },
+        {
+            type: 'content',
+            title: '⌨️ Reply-клавиатура',
+            content: `
+                <p>Кнопки внизу экрана.</p>
+                <div class="code-block">
+                    from telegram import ReplyKeyboardMarkup\n\nkeyboard = [["Привет", "Пока"]]\nmarkup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)\n\nawait update.message.reply_text("Выбери:", reply_markup=markup)
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔘 Inline-клавиатура',
+            content: `
+                <p>Кнопки под сообщением.</p>
+                <div class="code-block">
+                    from telegram import InlineKeyboardButton, InlineKeyboardMarkup\n\nkeyboard = [[InlineKeyboardButton("Нажми", callback_data="btn1")]]\nmarkup = InlineKeyboardMarkup(keyboard)\n\nawait update.message.reply_text("Кнопка:", reply_markup=markup)
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🖱️ Обработка нажатий',
+            content: `
+                <p>Inline-кнопки отправляют <strong>callback</strong>.</p>
+                <div class="code-block">
+                    from telegram.ext import CallbackQueryHandler\n\nasync def button(update, context):\n    query = update.callback_query\n    await query.answer()\n    await query.edit_message_text(f"Вы нажали: {query.data}")\n\napp.add_handler(CallbackQueryHandler(button))
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 9: Меню с кнопками',
+            task: 'Создайте бота с командой /menu, которая показывает inline-клавиатуру с двумя кнопками: «О нас» и «Контакты». При нажатии бот отвечает текстом.',
+            answer: `async def menu(update, context):\n    kb = [[InlineKeyboardButton("О нас", callback_data="about"),\n           InlineKeyboardButton("Контакты", callback_data="contacts")]]\n    await update.message.reply_text("Меню:", reply_markup=InlineKeyboardMarkup(kb))\n\nasync def menu_callback(update, context):\n    q = update.callback_query\n    await q.answer()\n    if q.data == "about":\n        await q.edit_message_text("Мы — учебный бот.")\n    else:\n        await q.edit_message_text("Пишите: test@example.com")\n\n# в main(): CommandHandler("menu", menu), CallbackQueryHandler(menu_callback)`
+        },
+        {
+            type: 'content',
+            title: '📷 Отправка фото',
+            content: `
+                <p>Бот может отправлять фото по URL или из файла.</p>
+                <div class="code-block">
+                    await update.message.reply_photo(\n    photo="https://example.com/cat.jpg",\n    caption="Вот котик!"\n)
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📎 Отправка документов',
+            content: `
+                <div class="code-block">
+                    await update.message.reply_document(\n    document=open("file.pdf", "rb"),\n    filename="документ.pdf"\n)
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📍 Отправка геолокации',
+            content: `
+                <div class="code-block">
+                    await update.message.reply_location(\n    latitude=55.7558,\n    longitude=37.6173\n)
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 10: Бот-открытка',
+            task: 'Напишите бота, который по команде /card отправляет случайную картинку с сайта-заглушки (например, https://picsum.photos/200).',
+            answer: `async def card(update, context):\n    await update.message.reply_photo(photo="https://picsum.photos/200")\n\n# в main():\napp.add_handler(CommandHandler("card", card))`
+        },
+        {
+            type: 'content',
+            title: '💾 Хранение данных: context.user_data',
+            content: `
+                <p>Данные пользователя можно сохранять в <code>context.user_data</code>.</p>
+                <div class="code-block">
+                    async def set_name(update, context):\n    context.user_data["name"] = update.message.text\n    await update.message.reply_text("Запомнил!")\n\nasync def get_name(update, context):\n    name = context.user_data.get("name", "незнакомец")\n    await update.message.reply_text(f"Тебя зовут {name}")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🗂️ Состояния: ConversationHandler',
+            content: `
+                <p>Для диалогов используют <code>ConversationHandler</code>.</p>
+                <div class="code-block">
+                    from telegram.ext import ConversationHandler\n\nNAME, AGE = range(2)\n\nasync def start(update, context):\n    await update.message.reply_text("Как тебя зовут?")\n    return NAME\n\nasync def get_name(update, context):\n    context.user_data["name"] = update.message.text\n    await update.message.reply_text("Сколько тебе лет?")\n    return AGE\n\nasync def get_age(update, context):\n    age = update.message.text\n    name = context.user_data["name"]\n    await update.message.reply_text(f"{name}, {age} лет. Записал!")\n    return ConversationHandler.END
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 11: Диалог знакомства',
+            task: 'Создайте диалог: бот спрашивает имя, потом город, затем выводит «Имя, город — приятно познакомиться!».',
+            answer: `NAME, CITY = range(2)\n\nasync def start(update, context):\n    await update.message.reply_text("Как тебя зовут?")\n    return NAME\n\nasync def name(update, context):\n    context.user_data["name"] = update.message.text\n    await update.message.reply_text("Из какого ты города?")\n    return CITY\n\nasync def city(update, context):\n    name = context.user_data["name"]\n    city = update.message.text\n    await update.message.reply_text(f"{name}, {city} — приятно познакомиться!")\n    return ConversationHandler.END`
+        },
+        {
+            type: 'content',
+            title: '🛡️ Обработка ошибок в боте',
+            content: `
+                <div class="code-block">
+                    async def error_handler(update, context):\n    print(f"Ошибка: {context.error}")\n\napp.add_error_handler(error_handler)
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📊 Логирование',
+            content: `
+                <div class="code-block">
+                    import logging\nlogging.basicConfig(\n    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",\n    level=logging.INFO\n)
+                </div>
+                <p>📌 Логи помогают понять, что делает бот.</p>
+            `
+        },
+        // ---------- РАЗДЕЛ 4: ПЕРВЫЙ БОТ (51-60) ----------
+        {
+            type: 'content',
+            title: '🚀 Запуск бота',
+            content: `
+                <p>Чтобы запустить бота, в терминале выполните:</p>
+                <div class="code-block">python bot.py</div>
+                <p>Если всё правильно, бот запустится и будет ждать сообщений.</p>
+                <p>📌 Чтобы остановить — нажмите <strong>Ctrl+C</strong> в терминале.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🐛 Типичные ошибки',
+            content: `
+                <ul>
+                    <li>★ <strong>Неправильный токен</strong> — проверьте, что скопировали полностью.</li>
+                    <li>★ <strong>Не установлена библиотека</strong> — выполните <code>pip install python-telegram-bot</code>.</li>
+                    <li>★ <strong>Ошибка в отступах</strong> — Python чувствителен к пробелам.</li>
+                    <li>★ <strong>Бот не отвечает</strong> — возможно, вы не запустили <code>app.run_polling()</code>.</li>
+                </ul>
+            `
+        },
+        {
+            type: 'content',
+            title: '📁 Файл .env для токена',
+            content: `
+                <p>Не храните токен прямо в коде. Создайте файл <code>.env</code>:</p>
+                <div class="code-block">BOT_TOKEN=1234567890:ABCdef...</div>
+                <p>И читайте его:</p>
+                <div class="code-block">
+                    import os\nfrom dotenv import load_dotenv\nload_dotenv()\nTOKEN = os.getenv("BOT_TOKEN")
+                </div>
+                <p>📌 Установите <code>python-dotenv</code>: <code>pip install python-dotenv</code>.</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 12: Бот с /start и кнопкой',
+            task: 'Создайте бота, который по /start приветствует и показывает Reply-клавиатуру с кнопкой «Помощь». При нажатии бот отправляет инструкцию.',
+            answer: `async def start(update, context):\n    kb = [["Помощь"]]\n    await update.message.reply_text("Привет!", reply_markup=ReplyKeyboardMarkup(kb, resize_keyboard=True))\n\nasync def help_btn(update, context):\n    if update.message.text == "Помощь":\n        await update.message.reply_text("Напиши /start, чтобы начать.")\n\n# в main(): CommandHandler("start", start), MessageHandler(filters.Regex("^Помощь$"), help_btn)`
+        },
+        {
+            type: 'content',
+            title: '📦 Модули в боте',
+            content: `
+                <p>Код можно разбить на файлы:</p>
+                <div class="info-tree">
+                    my_bot/\n├── bot.py\n├── handlers.py\n└── config.py
+                </div>
+                <p>📌 <code>config.py</code> хранит токен, <code>handlers.py</code> — обработчики.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔄 Асинхронность',
+            content: `
+                <p><code>async</code> и <code>await</code> позволяют боту обрабатывать несколько задач одновременно.</p>
+                <div class="code-block">
+                    async def hello(update, context):\n    await update.message.reply_text("Привет!")
+                </div>
+                <p>📌 Все функции-обработчики должны быть <code>async</code>.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🌐 Webhooks vs Polling',
+            content: `
+                <p><strong>Polling</strong> — бот сам спрашивает Telegram о новых сообщениях (проще для старта).</p>
+                <p><strong>Webhooks</strong> — Telegram сам отправляет сообщения боту (быстрее, но сложнее).</p>
+                <p>📌 Для обучения используем polling: <code>app.run_polling()</code>.</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 13: Бот-шпаргалка',
+            task: 'Создайте бота, который по команде /python выдаёт краткую шпаргалку по Python (например, «print() — вывод», «input() — ввод»).',
+            answer: `async def python_help(update, context):\n    text = "print() — вывод\\ninput() — ввод\\nif — условие\\nfor — цикл"\n    await update.message.reply_text(text)\n\n# в main(): CommandHandler("python", python_help)`
+        },
+        {
+            type: 'content',
+            title: '📝 Итоги раздела',
+            content: `
+                <p>Вы научились:</p>
+                <ul>
+                    <li>★ создавать бота через BotFather;</li>
+                    <li>★ устанавливать python-telegram-bot;</li>
+                    <li>★ писать эхо-бота;</li>
+                    <li>★ обрабатывать команды и сообщения;</li>
+                    <li>★ добавлять кнопки.</li>
+                </ul>
+                <p>📌 Дальше — больше практики!</p>
+            `
+        },
+        // ---------- РАЗДЕЛ 5: ОБРАБОТКА СООБЩЕНИЙ (61-70) ----------
+        {
+            type: 'content',
+            title: '📨 Обработка текста',
+            content: `
+                <div class="code-block">
+                    async def handle_text(update, context):\n    text = update.message.text\n    await update.message.reply_text(f"Ты написал: {text}")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📸 Обработка фото',
+            content: `
+                <div class="code-block">
+                    async def handle_photo(update, context):\n    photo = update.message.photo[-1]\n    await update.message.reply_text("Классное фото!")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🎤 Обработка голосовых',
+            content: `
+                <div class="code-block">
+                    async def handle_voice(update, context):\n    voice = update.message.voice\n    await update.message.reply_text("Я получил голосовое!")
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 14: Счётчик сообщений',
+            task: 'Напишите бота, который считает, сколько сообщений отправил пользователь, и отвечает «Ты написал N сообщений».',
+            answer: `async def counter(update, context):\n    count = context.user_data.get("count", 0) + 1\n    context.user_data["count"] = count\n    await update.message.reply_text(f"Ты написал {count} сообщений")\n\n# в main(): MessageHandler(filters.TEXT & ~filters.COMMAND, counter)`
+        },
+        {
+            type: 'content',
+            title: '🔍 Фильтры по ключевым словам',
+            content: `
+                <div class="code-block">
+                    app.add_handler(MessageHandler(filters.Regex("привет"), hello))
+                </div>
+                <p>📌 <code>filters.Regex</code> ищет совпадение с регулярным выражением.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '📋 Команды с аргументами',
+            content: `
+                <div class="code-block">
+                    async def echo_args(update, context):\n    args = context.args\n    await update.message.reply_text(f"Аргументы: {args}")
+                </div>
+                <p>Если написать <code>/echo привет мир</code>, <code>context.args</code> будет <code>["привет", "мир"]</code>.</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 15: Команда /say',
+            task: 'Создайте команду /say, которая повторяет текст после команды. Например, /say Привет → бот отвечает «Привет».',
+            answer: `async def say(update, context):\n    text = " ".join(context.args)\n    if text:\n        await update.message.reply_text(text)\n    else:\n        await update.message.reply_text("Напиши текст после /say")\n\n# в main(): CommandHandler("say", say)`
+        },
+        {
+            type: 'content',
+            title: '🎭 Несколько обработчиков',
+            content: `
+                <p>Порядок обработчиков важен. Первый подходящий срабатывает.</p>
+                <div class="code-block">
+                    app.add_handler(CommandHandler("start", start))\napp.add_handler(MessageHandler(filters.TEXT, echo))\napp.add_handler(MessageHandler(filters.PHOTO, photo))
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '⏱️ Задержки',
+            content: `
+                <div class="code-block">
+                    import asyncio\n\nasync def delayed(update, context):\n    await asyncio.sleep(2)\n    await update.message.reply_text("Прошло 2 секунды")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📌 Итоги',
+            content: `
+                <p>Вы научились обрабатывать разные типы сообщений и добавлять логику.</p>
+            `
+        },
+        // ---------- РАЗДЕЛ 6: КОМАНДЫ И ФИЛЬТРЫ (71-80) ----------
+        {
+            type: 'content',
+            title: '🎯 Список команд',
+            content: `
+                <p>Можно задать список команд для меню Telegram:</p>
+                <div class="code-block">
+                    await app.bot.set_my_commands([\n    ("start", "Начать"),\n    ("help", "Помощь"),\n    ("menu", "Меню")\n])
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔎 Фильтр по пользователю',
+            content: `
+                <div class="code-block">
+                    from telegram.ext import filters\n\nasync def admin_only(update, context):\n    if update.effective_user.id != 123456789:\n        await update.message.reply_text("Только для админа")\n        return\n    await update.message.reply_text("Привет, админ!")\n\n# в main(): CommandHandler("admin", admin_only)`
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 16: Приветствие по имени',
+            task: 'Напишите бота, который при команде /start обращается к пользователю по имени (используйте update.effective_user.first_name).',
+            answer: `async def start(update, context):\n    name = update.effective_user.first_name\n    await update.message.reply_text(f"Привет, {name}!")\n\n# в main(): CommandHandler("start", start)`
+        },
+        {
+            type: 'content',
+            title: '📊 Фильтр по типу чата',
+            content: `
+                <div class="code-block">
+                    filters.ChatType.PRIVATE\nfilters.ChatType.GROUP\nfilters.ChatType.SUPERGROUP
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📎 Комбинированные фильтры',
+            content: `
+                <div class="code-block">
+                    filters.TEXT & ~filters.COMMAND   # текст, но не команда\nfilters.PHOTO | filters.VIDEO      # фото или видео
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔄 Изменение сообщений',
+            content: `
+                <div class="code-block">
+                    msg = await update.message.reply_text("Старое")\nawait msg.edit_text("Новое")
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 17: Бот-опросник',
+            task: 'Создайте бота, который задаёт вопрос «Как дела?» и предлагает три inline-кнопки: «Отлично», «Нормально», «Плохо». При нажатии бот отвечает соответствующим текстом.',
+            answer: `async def ask(update, context):\n    kb = [[InlineKeyboardButton("Отлично", callback_data="good"),\n           InlineKeyboardButton("Нормально", callback_data="ok"),\n           InlineKeyboardButton("Плохо", callback_data="bad")]]\n    await update.message.reply_text("Как дела?", reply_markup=InlineKeyboardMarkup(kb))\n\nasync def answer(update, context):\n    q = update.callback_query\n    await q.answer()\n    answers = {"good": "Рад за тебя!", "ok": "Бывает.", "bad": "Не грусти!"}\n    await q.edit_message_text(answers[q.data])\n\n# в main(): CommandHandler("ask", ask), CallbackQueryHandler(answer)`
+        },
+        {
+            type: 'content',
+            title: '📝 Логирование действий',
+            content: `
+                <div class="code-block">
+                    import logging\nlogger = logging.getLogger(__name__)\n\nasync def log_message(update, context):\n    logger.info(f"Сообщение от {update.effective_user.id}: {update.message.text}")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📌 Итоги',
+            content: `
+                <p>Фильтры и команды — основа управления ботом.</p>
+            `
+        },
+        // ---------- РАЗДЕЛ 7: КЛАВИАТУРЫ (81-90) ----------
+        {
+            type: 'content',
+            title: '⌨️ Reply-клавиатура подробнее',
+            content: `
+                <div class="code-block">
+                    from telegram import ReplyKeyboardMarkup, KeyboardButton\n\nkeyboard = [\n    [KeyboardButton("Кнопка 1"), KeyboardButton("Кнопка 2")],\n    [KeyboardButton("Кнопка 3")]\n]\nmarkup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔘 Inline-клавиатура подробнее',
+            content: `
+                <div class="code-block">
+                    keyboard = [\n    [InlineKeyboardButton("Сайт", url="https://example.com")],\n    [InlineKeyboardButton("Кнопка", callback_data="btn")]\n]
+                </div>
+                <p>📌 Inline-кнопки могут открывать ссылки.</p>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 18: Меню навигации',
+            task: 'Создайте бота с inline-меню: «Главная», «О нас», «Контакты». При нажатии кнопок бот редактирует сообщение, показывая соответствующий текст.',
+            answer: `async def menu(update, context):\n    kb = [[InlineKeyboardButton("Главная", callback_data="main"),\n           InlineKeyboardButton("О нас", callback_data="about"),\n           InlineKeyboardButton("Контакты", callback_data="contacts")]]\n    await update.message.reply_text("Меню:", reply_markup=InlineKeyboardMarkup(kb))\n\nasync def nav(update, context):\n    q = update.callback_query\n    await q.answer()\n    texts = {"main": "Главная страница", "about": "Мы — бот", "contacts": "test@example.com"}\n    await q.edit_message_text(texts[q.data])`
+        },
+        {
+            type: 'content',
+            title: '🖼️ Кнопки с картинками',
+            content: `
+                <p>Inline-кнопки не могут содержать картинки, но можно отправить фото с подписью и кнопками.</p>
+                <div class="code-block">
+                    await update.message.reply_photo(\n    photo="https://picsum.photos/200",\n    caption="Выбери:",\n    reply_markup=markup\n)
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🔄 Динамические клавиатуры',
+            content: `
+                <p>Клавиатуру можно создавать в зависимости от данных.</p>
+                <div class="code-block">
+                    items = ["A", "B", "C"]\nkb = [[InlineKeyboardButton(item, callback_data=item)] for item in items]
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 19: Голосование',
+            task: 'Создайте бота для голосования: команда /vote показывает кнопки «Да» и «Нет». После нажатия бот отвечает «Ваш голос учтён» и блокирует кнопки.',
+            answer: `async def vote(update, context):\n    kb = [[InlineKeyboardButton("Да", callback_data="yes"),\n           InlineKeyboardButton("Нет", callback_data="no")]]\n    await update.message.reply_text("Голосуйте:", reply_markup=InlineKeyboardMarkup(kb))\n\nasync def vote_callback(update, context):\n    q = update.callback_query\n    await q.answer("Голос учтён!")\n    await q.edit_message_text(f"Вы проголосовали: {'Да' if q.data=='yes' else 'Нет'}", reply_markup=None)`
+        },
+        {
+            type: 'content',
+            title: '📌 Удаление клавиатуры',
+            content: `
+                <div class="code-block">
+                    from telegram import ReplyKeyboardRemove\nawait update.message.reply_text("Клавиатура убрана", reply_markup=ReplyKeyboardRemove())
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📊 Итоги раздела',
+            content: `
+                <p>Вы освоили Reply и Inline клавиатуры — главный инструмент взаимодействия.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🎓 Поздравляем!',
+            content: `
+                <p>Вы прошли основы. Теперь вы можете создавать ботов с меню, кнопками и логикой.</p>
+                <p>📌 Практикуйтесь, экспериментируйте, читайте документацию.</p>
+            `
+        },
+        // ---------- РАЗДЕЛ 8: МЕДИА И ФАЙЛЫ (91-100) ----------
+        {
+            type: 'content',
+            title: '📤 Отправка видео',
+            content: `
+                <div class="code-block">
+                    await update.message.reply_video(video="https://example.com/video.mp4")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📥 Получение файлов',
+            content: `
+                <div class="code-block">
+                    file = await update.message.document.get_file()\nawait file.download_to_drive("file.pdf")
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 20: Бот-хранилище',
+            task: 'Создайте бота, который сохраняет присланные пользователем текстовые сообщения в файл notes.txt.',
+            answer: `async def save_note(update, context):\n    text = update.message.text\n    with open("notes.txt", "a", encoding="utf-8") as f:\n        f.write(text + "\\n")\n    await update.message.reply_text("Заметка сохранена!")\n\n# в main(): MessageHandler(filters.TEXT & ~filters.COMMAND, save_note)`
+        },
+        {
+            type: 'content',
+            title: '🎵 Аудио и голосовые',
+            content: `
+                <div class="code-block">
+                    await update.message.reply_audio(audio="https://example.com/song.mp3")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '📊 Отправка документов из памяти',
+            content: `
+                <div class="code-block">
+                    from io import BytesIO\nfile = BytesIO(b"Hello, file!")\nawait update.message.reply_document(document=file, filename="hello.txt")
+                </div>
+            `
+        },
+        {
+            type: 'content',
+            title: '🖼️ Альбомы',
+            content: `
+                <div class="code-block">
+                    from telegram import InputMediaPhoto\nmedia = [InputMediaPhoto("url1"), InputMediaPhoto("url2")]\nawait update.message.reply_media_group(media=media)
+                </div>
+            `
+        },
+        {
+            type: 'task',
+            title: '📝 Задание 21: Бот-галерея',
+            task: 'Создайте бота, который по команде /gallery отправляет три случайных фото из picsum.photos.',
+            answer: `async def gallery(update, context):\n    for i in range(3):\n        await update.message.reply_photo(photo=f"https://picsum.photos/200?random={i}")\n\n# в main(): CommandHandler("gallery", gallery)`
+        },
+        {
+            type: 'content',
+            title: '📌 Итоги',
+            content: `
+                <p>Теперь вы умеете работать с медиафайлами.</p>
+            `
+        },
+        {
+            type: 'content',
+            title: '🚀 Развёртывание',
+            content: `
+                <p>Чтобы бот работал 24/7, его нужно разместить на сервере.</p>
+                <ul>
+                    <li>★ <strong>PythonAnywhere</strong> — простой хостинг для начинающих.</li>
+                    <li>★ <strong>Heroku</strong> — облачная платформа (требует настройки).</li>
+                    <li>★ <strong>VPS</strong> — аренда сервера.</li>
+                </ul>
+                <p>📌 Для обучения достаточно запускать бота на своём компьютере.</p>
+            `
+        },
+        {
+            type: 'title',
+            title: '🎓 Спасибо за внимание!',
+            subtitle: 'Теперь вы можете создать своего Telegram-бота на Python.',
+            badges: ['Python', 'Telegram', 'Боты', 'python-telegram-bot']
+        }
+    ];
+
+
+    // ==================== ГЕНЕРАЦИЯ СЛАЙДОВ ====================
+    const slidesContainer = document.getElementById('slidesContainer');
+
+    function renderSlides() {
+        slidesData.forEach((slide, index) => {
+            const slideDiv = document.createElement('div');
+            slideDiv.className = 'slide';
+            if (slide.type === 'title') {
+                slideDiv.classList.add('title-slide');
+                slideDiv.innerHTML = `
+                    <div class="slide-content">
+                        <h1>${slide.title}</h1>
+                        <div class="sub">${slide.subtitle || ''}</div>
+                        <div style="margin-top: 3rem; text-align: center;">
+                            ${(slide.badges || []).map(b => `<span class="badge">${b}</span>`).join('')}
+                        </div>
+                        <p style="margin-top: 3rem; text-align: center;">← → или кнопки для навигации</p>
+                    </div>
+                `;
+            } else if (slide.type === 'content') {
+                slideDiv.innerHTML = `
+                    <div class="slide-content">
+                        <h2>${slide.title}</h2>
+                        ${slide.content || ''}
+                    </div>
+                `;
+            } else if (slide.type === 'task') {
+                const answerId = `answer${index}`;
+                slideDiv.innerHTML = `
+                    <div class="slide-content">
+                        <h2>${slide.title}</h2>
+                        <div class="task-card">
+                            <h3>${slide.title}</h3>
+                            <p>${slide.task}</p>
+                            <div class="answer-container">
+                                <div class="answer-label">
+                                    <span>🔐 Ответ (решение):</span>
+                                    <button class="unlock-btn" data-answer-id="${answerId}">Показать ответ</button>
+                                </div>
+                                <div id="${answerId}" class="answer-content">
+                                    <pre>${slide.answer || 'Ответ не указан.'}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            slidesContainer.appendChild(slideDiv);
+        });
+        // document.getElementById('slideCounter').innerText = `Слайд 1 / ${slidesData.length}`;
+    }
+
+    // ==================== НОРМАЛИЗАЦИЯ БЛОКОВ КОДА ====================
+    // Убирает отступ у первой строки кода (который появляется из-за
+    // форматирования HTML внутри шаблонных строк).
+    function normalizeCodeBlocks(root) {
+        root.querySelectorAll('.code-block, pre, .info-tree').forEach(el => {
+            const lines = el.textContent.split('\n');
+
+            // удаляем пустые строки в начале и в конце
+            while (lines.length && lines[0].trim() === '') lines.shift();
+            while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+
+            // первая строка кода — без ведущих пробелов
+            if (lines.length) {
+                lines[0] = lines[0].replace(/^\s+/, '');
+            }
+
+            el.textContent = lines.join('\n');
+        });
+    }
+
+    // ==================== НАВИГАЦИЯ ====================
+       // ==================== НАВИГАЦИЯ ====================
+    const totalSlides = slidesData.length;
+    const STORAGE_KEY = 'presentationSlideIndex';
+    let currentIndex = 0;
+
+    const slideInput = document.getElementById('slideInput');
+    const totalSlidesSpan = document.getElementById('totalSlidesSpan');
+
+    // Сохраняет текущий слайд в localStorage
+    function saveSlideIndex() {
+        try {
+            localStorage.setItem(STORAGE_KEY, String(currentIndex));
+        } catch (e) {
+            /* localStorage может быть недоступен (например, file://) */
+        }
+    }
+
+    function updateSlide() {
+        slidesContainer.style.transform = `translateX(${-currentIndex * 100}%)`;
+        slideInput.value = currentIndex + 1;
+        saveSlideIndex();
+    }
+
+    // ---- Кнопки и стрелки ----
+    function nextSlide() {
+        if (currentIndex < totalSlides - 1) {
+            currentIndex++;
+            updateSlide();
+        }
+    }
+
+    function prevSlide() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateSlide();
+        }
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', nextSlide);
+    document.getElementById('prevBtn').addEventListener('click', prevSlide);
+
+    window.addEventListener('keydown', (e) => {
+        // Не перехватываем стрелки, пока пользователь вводит номер слайда
+        if (document.activeElement === slideInput) return;
+        if (e.key === 'ArrowRight') nextSlide();
+        if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    // ---- Ручной ввод номера ----
+    function goToSlide(n) {
+        n = parseInt(n, 10);
+        if (isNaN(n)) {                              // пустое/некорректное — откат
+            slideInput.value = currentIndex + 1;
+            return;
+        }
+        n = Math.min(Math.max(n, 1), totalSlides);   // зажимаем в 1..totalSlides
+        currentIndex = n - 1;
+        updateSlide();
+    }
+
+    slideInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            goToSlide(slideInput.value);
+            slideInput.blur();
+        } else if (e.key === 'Escape') {
+            slideInput.value = currentIndex + 1;
+            slideInput.blur();
+        }
+    });
+
+    slideInput.addEventListener('blur', () => {
+        goToSlide(slideInput.value);
+    });
+
+    slideInput.addEventListener('focus', () => {
+        slideInput.select();
+    });
+
+
+
+    
+    // ==================== ПОКАЗ ОТВЕТОВ ====================
+    function showAnswerWithPassword(answerElementId) {
+        const password = prompt("Введите пароль для просмотра ответа:");
+        if (password === "123") {
+            const answerDiv = document.getElementById(answerElementId);
+            if (answerDiv) {
+                answerDiv.classList.add("visible");
+                const btn = document.querySelector(`.unlock-btn[data-answer-id="${answerElementId}"]`);
+                if (btn) {
+                    btn.textContent = "✓ Ответ открыт";
+                    btn.disabled = true;
+                    btn.style.opacity = "0.6";
+                    btn.style.cursor = "default";
+                }
+            }
+        } else {
+            alert("Неверный пароль! Ответ не показан.");
+        }
+    }
+
+    // Глобальная кнопка — показать все ответы
+    const globalUnlockBtn = document.getElementById('globalUnlockBtn');
+    globalUnlockBtn.addEventListener('click', () => {
+        const password = prompt("Введите мастер-пароль для показа ВСЕХ ответов:");
+        if (password === "123") {
+            const allAnswerDivs = document.querySelectorAll('.answer-content');
+            let openedCount = 0;
+            allAnswerDivs.forEach(div => {
+                if (!div.classList.contains('visible')) {
+                    div.classList.add('visible');
+                    openedCount++;
+                }
+            });
+            const allBtns = document.querySelectorAll('.unlock-btn');
+            allBtns.forEach(btn => {
+                btn.textContent = "✓ Ответ открыт";
+                btn.disabled = true;
+                btn.style.opacity = "0.6";
+                btn.style.cursor = "default";
+            });
+            alert(`Открыто ${openedCount} ответов!`);
+        } else {
+            alert("Неверный пароль! Ответы не показаны.");
+        }
+    });
+
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+    renderSlides();
+    normalizeCodeBlocks(slidesContainer);
+
+    // Показываем общее количество слайдов
+    totalSlidesSpan.textContent = totalSlides;
+
+    // Восстанавливаем последний открытый слайд
+    let savedIndex = NaN;
+    try {
+        savedIndex = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+    } catch (e) { /* localStorage недоступен — начинаем с 1 */ }
+
+    if (Number.isInteger(savedIndex) && savedIndex >= 0 && savedIndex < totalSlides) {
+        currentIndex = savedIndex;
+    }
+
+    updateSlide();
+
+    // Делегирование событий для кнопок ответов
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('unlock-btn')) {
+            const answerId = e.target.getAttribute('data-answer-id');
+            if (answerId) {
+                const answerDiv = document.getElementById(answerId);
+                if (answerDiv && answerDiv.classList.contains('visible')) {
+                    alert("Ответ уже открыт!");
+                    return;
+                }
+                showAnswerWithPassword(answerId);
+            }
+        }
+    });
+</script>
+</body>
+</html>
